@@ -1,7 +1,10 @@
-const input = document.getElementById('textInput') as HTMLInputElement;
-const output = document.getElementById('output') as HTMLDivElement;
+const input = document.getElementById("textInput") as HTMLInputElement;
+const output = document.getElementById("output") as HTMLDivElement;
 
-input.addEventListener('input', (e) => {
+input.addEventListener("input", (e) => {
     const text = (e.target as HTMLInputElement).value;
-    console.log(text);
+
+    // TODO: aquí se renderiza el logo texto -> grid de divs.
+    void text;
+    void output;
 });
