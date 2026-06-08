@@ -19,12 +19,78 @@
 body {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 24px;
     font-family: var(--font);
     color: rgb(var(--foreground));
     background-color: rgb(var(--bg));
+}
+
+main.terminal {
+    margin: auto;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 80px 0 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.footer__group {
+    margin: 0 auto;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.footer__group:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.footer__link {
+    color: rgb(var(--primary));
+    font-weight: 700;
+    text-decoration: none;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.footer__link:hover {
+    color: rgb(var(--primary-soft));
+    text-decoration: underline;
+}
+
+.footer__copy {
+    margin-top: 8px;
+    color: rgb(var(--foreground));
+}
+
+.footer__reveal {
+    margin-top: 8px;
+    color: rgb(var(--foreground));
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.footer__heart {
+    color: rgb(var(--secondary));
+}
+
+/* en dispositivos con hover real, ocultar hasta hover */
+@media (hover: hover) {
+    .footer__reveal {
+        opacity: 0;
+    }
+
+    .footer__group:hover .footer__reveal {
+        opacity: 1;
+    }
 }
 
 .terminal {
