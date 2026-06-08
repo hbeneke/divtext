@@ -1,17 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DivText</title>
-    <link rel="stylesheet" href="src/styles.css">
+    <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
-    <main>
-        <h1>DivText</h1>
-        <input type="text" id="textInput" placeholder="Enter your text">
-        <div id="output"></div>
+    <main class="terminal">
+        <div class="terminal__bar">
+            <span class="terminal__dot terminal__dot--red"></span>
+            <span class="terminal__dot terminal__dot--yellow"></span>
+            <span class="terminal__dot terminal__dot--green"></span>
+            <span class="terminal__title">user@divtext: ~</span>
+        </div>
+
+        <div class="terminal__body">
+            <p class="line"><span class="prompt">$</span> ./divtext --help</p>
+            <p class="line"><span class="accent">DivText</span> <span class="muted">v1.0.1</span></p>
+            <p class="line">Convierte tu texto en un logotipo construido con <span class="tag">&lt;div&gt;</span>.</p>
+            <p class="line muted">Escribe una palabra y observa cómo se dibuja, celda a celda.</p>
+            <p class="line">&nbsp;</p>
+            <p class="line"><span class="prompt">$</span> ./divtext --run</p>
+
+            <label class="line input-line" for="textInput">
+                <span class="prompt">&gt;</span>
+                <input
+                    type="text"
+                    id="textInput"
+                    class="input"
+                    placeholder="escribe aquí_"
+                    autocomplete="off"
+                    spellcheck="false"
+                    autofocus
+                >
+            </label>
+
+            <div class="output" id="output"></div>
+        </div>
     </main>
+
     <script src="dist/main.js"></script>
 </body>
 </html>
