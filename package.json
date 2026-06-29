@@ -1,9 +1,11 @@
 {
   "name": "divtext",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "scripts": {
     "dev": "tsc -w",
-    "build": "tsc",
+    "dev:css": "tailwindcss -i src/input.css -o dist/style.css --watch",
+    "build": "tsc && npm run build:css",
+    "build:css": "tailwindcss -i src/input.css -o dist/style.css --minify",
     "sync": "node scripts/sync-master.mjs",
     "sync:minor": "node scripts/sync-master.mjs --minor",
     "sync:patch": "node scripts/sync-master.mjs --patch",
@@ -13,6 +15,8 @@
     "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.1",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5.0.0"
   }
 }

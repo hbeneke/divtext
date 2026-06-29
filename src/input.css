@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+    --color-bg: #1a1b1e;
+    --color-term: #202125;
+    --color-bar: #2a2b30;
+    --color-fg: #d4d4d4;
+    --color-primary: #10b981;
+    --color-primary-soft: #bbf7d0;
+    --color-secondary: #facc15;
+    --color-muted: #787c82;
+
+    --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", ui-monospace, monospace;
+
+    --animate-blink: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
