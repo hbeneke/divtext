@@ -82,7 +82,7 @@ main.terminal {
     color: rgb(var(--secondary));
 }
 
-/* en dispositivos con hover real, ocultar hasta hover */
+/* on devices with real hover, hide until hover */
 @media (hover: hover) {
     .footer__reveal {
         opacity: 0;
@@ -181,7 +181,7 @@ main.terminal {
     color: rgb(var(--muted));
 }
 
-/* zona donde luego se dibuja el logo con divs */
+/* area where the logo is later drawn with divs */
 .output {
     margin-top: 18px;
     min-height: 80px;

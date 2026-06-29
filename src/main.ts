@@ -4,7 +4,7 @@ const output = document.getElementById("output") as HTMLDivElement;
 input.addEventListener("input", (e) => {
     const text = (e.target as HTMLInputElement).value;
 
-    // TODO: aquí se renderiza el logo texto -> grid de divs.
+    // TODO: render the text logo here -> grid of divs.
     void text;
     void output;
 });
