@@ -1,6 +1,6 @@
 {
   "name": "divtext",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "dev": "tsc -w",
     "dev:css": "tailwindcss -i src/input.css -o dist/style.css --watch",

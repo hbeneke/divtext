@@ -22,6 +22,12 @@ const newWindowBtn = document.getElementById("newWindow") as HTMLButtonElement;
 const WINDOW_WIDTH = 720;
 const CASCADE = 28;
 
+// macOS-style diagonal arrows: outward = maximize, inward = restore
+const ICON_EXPAND =
+    '<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5 L2 2"/><path d="M2 4.5 L2 2 L4.5 2"/><path d="M7 7 L10 10"/><path d="M10 7.5 L10 10 L7.5 10"/></svg>';
+const ICON_COLLAPSE =
+    '<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2 L5 5"/><path d="M5 2.5 L5 5 L2.5 5"/><path d="M10 10 L7 7"/><path d="M7 9.5 L7 7 L9.5 7"/></svg>';
+
 const windows: TerminalWindow[] = [];
 let idSeq = 0;
 let zSeq = 10;
@@ -41,7 +47,7 @@ function windowTemplate(title: string): string {
             </button>
             <button data-action="maximize" type="button" title="Maximize" aria-label="Maximize"
                 class="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#27c93f] text-[11px] font-bold leading-none text-black/70 cursor-pointer">
-                <span class="opacity-0 group-hover/bar:opacity-100 transition-opacity">+</span>
+                <span data-role="maximize-glyph" class="flex opacity-0 group-hover/bar:opacity-100 transition-opacity">${ICON_EXPAND}</span>
             </button>
             <svg class="ml-2 block text-muted shrink-0" width="20" height="20" viewBox="0 0 64 64" fill="none" aria-hidden="true">
                 <rect x="10" y="14" width="44" height="36" rx="4" stroke="currentColor" stroke-width="3" fill="none"/>
@@ -120,12 +126,21 @@ function restoreWindow(win: TerminalWindow): void {
     renderTabs();
 }
 
+function setMaximizeGlyph(win: TerminalWindow): void {
+    const glyph = win.el.querySelector('[data-role="maximize-glyph"]') as HTMLElement | null;
+    const btn = win.el.querySelector('[data-action="maximize"]') as HTMLElement | null;
+    const maximized = win.state === "maximized";
+    if (glyph) glyph.innerHTML = maximized ? ICON_COLLAPSE : ICON_EXPAND;
+    if (btn) btn.title = maximized ? "Restore" : "Maximize";
+}
+
 function applyMaximized(win: TerminalWindow): void {
     const s = win.el.style;
     s.left = "8px";
     s.top = "8px";
     s.width = `${desktop.clientWidth - 16}px`;
     s.height = `${desktop.clientHeight - 16}px`;
+    setMaximizeGlyph(win);
 }
 
 function toggleMaximize(win: TerminalWindow): void {
@@ -140,6 +155,7 @@ function toggleMaximize(win: TerminalWindow): void {
             win.el.style.width = `${g.width}px`;
         }
         win.el.style.height = "";
+        setMaximizeGlyph(win);
     } else {
         win.restore = {
             left: win.el.offsetLeft,
