@@ -1,4 +1,4 @@
-import { emit, on, type MinimizedWindow } from "../events";
+import { emit, on, type MinimizedWindow } from "@/events";
 
 export class DesktopTaskbar extends HTMLElement {
   private tabs!: HTMLElement;

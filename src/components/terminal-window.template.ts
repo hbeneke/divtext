@@ -1,4 +1,4 @@
-import { ICON_EXPAND } from "../icons";
+import { ICON_EXPAND } from "@/icons";
 
 export function terminalWindowTemplate(): string {
   return `

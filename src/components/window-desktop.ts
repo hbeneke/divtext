@@ -1,6 +1,6 @@
-import { clamp } from "../clamp";
-import { emit, on } from "../events";
-import type { TerminalWindow } from "./terminal-window";
+import { clamp } from "@/clamp";
+import { emit, on } from "@/events";
+import type { TerminalWindow } from "@/components/terminal-window";
 
 const WINDOW_WIDTH = 720;
 const CASCADE = 28;

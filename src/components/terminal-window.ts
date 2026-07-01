@@ -1,7 +1,7 @@
-import { clamp } from "../clamp";
-import { emit } from "../events";
-import { ICON_COLLAPSE, ICON_EXPAND } from "../icons";
-import { terminalWindowTemplate } from "./terminal-window.template";
+import { clamp } from "@/clamp";
+import { emit } from "@/events";
+import { ICON_COLLAPSE, ICON_EXPAND } from "@/icons";
+import { terminalWindowTemplate } from "@/components/terminal-window.template";
 
 type WindowState = "open" | "minimized" | "maximized";
 
