@@ -1,12 +1,10 @@
 {
   "name": "divtext",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "scripts": {
-    "dev": "tsc -w",
-    "dev:css": "tailwindcss -i src/input.css -o dist/style.css --watch",
-    "build": "tsc && npm run build:css",
-    "build:css": "tailwindcss -i src/input.css -o dist/style.css --minify",
-    "build:vercel": "npm run build && node scripts/build-public.mjs",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
     "sync": "node scripts/sync-master.mjs",
     "sync:minor": "node scripts/sync-master.mjs --minor",
     "sync:patch": "node scripts/sync-master.mjs --patch",
@@ -16,8 +14,12 @@
     "prepare": "node -e \"try{require('child_process').execSync('git config core.hooksPath .githooks')}catch{}\""
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.1",
+    "@tailwindcss/vite": "^4.3.2",
     "tailwindcss": "^4.3.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vite": "^8.1.2"
+  },
+  "dependencies": {
+    "@hbeneke/parley": "^0.2.2"
   }
 }

@@ -4,30 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DivText</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="dist/style.css">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 </head>
 <body class="min-h-screen bg-bg font-mono text-fg overflow-hidden">
-    <div id="desktop" class="fixed inset-0 pointer-events-none"></div>
+    <window-desktop class="fixed inset-0 pointer-events-none"></window-desktop>
 
-    <footer class="fixed bottom-2 left-1/2 -translate-x-1/2 z-0 flex flex-col gap-2 pb-2 text-center text-xs font-semibold pointer-events-none">
-        <div class="group mx-auto px-4 py-2 rounded-lg transition-colors duration-300 hover:bg-white/[0.04] pointer-events-auto">
-            <p>
-                <a href="https://hbeneke.dev" class="text-primary font-bold no-underline [text-underline-offset:2px] transition-colors duration-200 hover:text-primary-soft hover:underline" aria-label="Learn more about Habakuk Beneke" target="_blank" rel="noopener noreferrer">
-                    Habakuk Beneke
-                </a>
-            </p>
-            <p class="mt-2 text-fg">Copyright© 2024-26. All bugs reserved.</p>
-            <p class="mt-2 text-fg opacity-100 transition-opacity duration-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">Made with <span class="text-secondary">❤️</span> from Spain.</p>
-        </div>
-    </footer>
+    <site-footer nickname="Habakuk Beneke" year="2024-26" copyright="bugs"
+        class="fixed bottom-2 left-1/2 -translate-x-1/2 z-0 w-max [--link:var(--color-primary)] [--link-hover:var(--color-primary-soft)] [--accent:var(--color-secondary)] [--font:var(--font-mono)]"></site-footer>
 
-    <div id="taskbar" class="fixed bottom-4 left-4 z-[1000] flex items-center gap-2">
-        <div id="tabs" class="flex items-center gap-2"></div>
-        <button id="newWindow" type="button" title="New window" aria-label="New window"
-            class="flex items-center justify-center w-8 h-8 rounded-md bg-bar text-muted text-lg leading-none border border-white/[0.06] transition-colors hover:bg-white/[0.06] hover:text-fg cursor-pointer">+</button>
-    </div>
+    <desktop-taskbar class="fixed bottom-4 left-4 z-[1000] flex items-center gap-2"></desktop-taskbar>
 
-    <script src="dist/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
