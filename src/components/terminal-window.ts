@@ -1,4 +1,5 @@
 import { clamp } from "@/clamp";
+import { formatHtml, renderWord } from "@/letters";
 import { emit } from "@/events";
 import { ICON_COLLAPSE, ICON_EXPAND } from "@/icons";
 import { terminalWindowTemplate } from "@/components/terminal-window.template";
@@ -18,6 +19,9 @@ export class TerminalWindow extends HTMLElement {
   private state: WindowState = "open";
   private restore: Geometry | null = null;
   private input!: HTMLInputElement;
+  private output!: HTMLElement;
+  private tools!: HTMLElement;
+  private code!: HTMLElement;
   private built = false;
 
   connectedCallback(): void {
@@ -31,6 +35,9 @@ export class TerminalWindow extends HTMLElement {
     const bar = this.querySelector('[data-role="bar"]') as HTMLElement;
     const title = this.querySelector('[data-role="title"]') as HTMLElement;
     this.input = this.querySelector('[data-role="input"]') as HTMLInputElement;
+    this.output = this.querySelector('[data-role="output"]') as HTMLElement;
+    this.tools = this.querySelector('[data-role="tools"]') as HTMLElement;
+    this.code = this.querySelector('[data-role="code"]') as HTMLElement;
 
     title.textContent = this.windowTitle;
 
@@ -51,10 +58,49 @@ export class TerminalWindow extends HTMLElement {
       this.input.focus();
     });
 
-    this.input.addEventListener("input", (e) => {
-      const text = (e.target as HTMLInputElement).value;
-      void text;
+    this.input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const text = this.input.value.trim();
+      if (!text) return;
+      this.render(text);
+      this.input.value = "";
     });
+
+    this.onAction("view-html", () => this.toggleCode());
+    this.onAction("copy-html", (el) => this.copyHtml(el));
+  }
+
+  private render(text: string): void {
+    const word = renderWord(text);
+    this.output.replaceChildren(word);
+    this.code.textContent = formatHtml(word);
+    this.code.classList.add("hidden");
+    this.setViewLabel(false);
+    this.tools.classList.remove("hidden");
+  }
+
+  private toggleCode(): void {
+    const shown = this.code.classList.toggle("hidden");
+    this.setViewLabel(!shown);
+  }
+
+  private setViewLabel(shown: boolean): void {
+    const button = this.querySelector('[data-action="view-html"]');
+    if (button) button.textContent = shown ? "Hide HTML" : "View HTML";
+  }
+
+  private async copyHtml(button: HTMLElement): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.code.textContent ?? "");
+      const original = button.textContent;
+      button.textContent = "Copied!";
+      setTimeout(() => (button.textContent = original), 1200);
+    } catch {
+      // Clipboard blocked (e.g. insecure context) — reveal the code to copy manually.
+      this.code.classList.remove("hidden");
+      this.setViewLabel(true);
+    }
   }
 
   get isMinimized(): boolean {
@@ -90,8 +136,9 @@ export class TerminalWindow extends HTMLElement {
     return this.closest("window-desktop") as HTMLElement;
   }
 
-  private onAction(name: string, handler: () => void): void {
-    this.querySelector(`[data-action="${name}"]`)!.addEventListener("click", handler);
+  private onAction(name: string, handler: (el: HTMLElement) => void): void {
+    const el = this.querySelector(`[data-action="${name}"]`) as HTMLElement;
+    el.addEventListener("click", () => handler(el));
   }
 
   private toggleMaximize(): void {

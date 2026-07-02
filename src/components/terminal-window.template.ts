@@ -33,13 +33,27 @@ export function terminalWindowTemplate(): string {
       <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --run</p>
 
       <label class="flex items-center gap-2 mt-2 cursor-text whitespace-pre-wrap break-words">
-        <span class="text-secondary select-none">&gt;</span>
+        <span class="select-none shrink-0"><span class="text-primary font-bold">user@divtext</span><span class="text-fg">:</span><span class="text-secondary">~</span><span class="text-fg">$</span></span>
         <input type="text" data-role="input"
           class="flex-1 bg-transparent border-none outline-none text-fg font-[inherit] text-[inherit] caret-primary placeholder:text-muted"
-          placeholder="type here_" autocomplete="off" spellcheck="false">
+          placeholder="type a word and press enter" autocomplete="off" spellcheck="false">
       </label>
 
       <div data-role="output" class="mt-[18px] min-h-[80px]"></div>
+
+      <div data-role="tools" class="mt-4 hidden">
+        <div class="flex items-center gap-2">
+          <button data-action="view-html" type="button"
+            class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
+            View HTML
+          </button>
+          <button data-action="copy-html" type="button"
+            class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
+            Copy HTML
+          </button>
+        </div>
+        <pre data-role="code" class="hidden mt-3 p-3 rounded-md bg-black/40 text-muted text-[12px] leading-[1.5] overflow-auto max-h-[220px] whitespace-pre-wrap break-all"></pre>
+      </div>
     </div>
   `;
 }
