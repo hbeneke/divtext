@@ -70,7 +70,7 @@ export class WindowDesktop extends HTMLElement {
   private notifyChanged(): void {
     const minimized = this.windows()
       .filter((w) => w.isMinimized)
-      .map((w) => ({ id: w.windowId, title: w.windowTitle }));
+      .map((w) => ({ id: w.windowId, title: w.taskbarTitle }));
     emit(document, "wm:changed", minimized);
   }
 }

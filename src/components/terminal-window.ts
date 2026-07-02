@@ -1,5 +1,5 @@
 import { clamp } from "@/clamp";
-import { formatHtml, renderWord } from "@/letters";
+import { exportCode, renderWord, type ExportMode } from "@/letters";
 import { emit } from "@/events";
 import { ICON_COLLAPSE, ICON_EXPAND } from "@/icons";
 import { terminalWindowTemplate } from "@/components/terminal-window.template";
@@ -22,6 +22,9 @@ export class TerminalWindow extends HTMLElement {
   private output!: HTMLElement;
   private tools!: HTMLElement;
   private code!: HTMLElement;
+  private titleEl!: HTMLElement;
+  private mode: ExportMode = "html";
+  private currentWord = "";
   private built = false;
 
   connectedCallback(): void {
@@ -33,13 +36,13 @@ export class TerminalWindow extends HTMLElement {
     this.innerHTML = terminalWindowTemplate();
 
     const bar = this.querySelector('[data-role="bar"]') as HTMLElement;
-    const title = this.querySelector('[data-role="title"]') as HTMLElement;
+    this.titleEl = this.querySelector('[data-role="title"]') as HTMLElement;
     this.input = this.querySelector('[data-role="input"]') as HTMLInputElement;
     this.output = this.querySelector('[data-role="output"]') as HTMLElement;
     this.tools = this.querySelector('[data-role="tools"]') as HTMLElement;
     this.code = this.querySelector('[data-role="code"]') as HTMLElement;
 
-    title.textContent = this.windowTitle;
+    this.titleEl.textContent = this.windowTitle;
 
     this.addEventListener("pointerdown", () => emit(this, "wm:focus"), true);
     this.enableDrag(bar);
@@ -67,17 +70,47 @@ export class TerminalWindow extends HTMLElement {
       this.input.value = "";
     });
 
-    this.onAction("view-html", () => this.toggleCode());
-    this.onAction("copy-html", (el) => this.copyHtml(el));
+    this.onAction("view-code", () => this.toggleCode());
+    this.onAction("copy-code", (el) => this.copyCode(el));
+    this.onMode("html");
+    this.onMode("css");
+    this.highlightMode();
   }
 
   private render(text: string): void {
-    const word = renderWord(text);
-    this.output.replaceChildren(word);
-    this.code.textContent = formatHtml(word);
+    this.currentWord = text;
+    this.setTitle(text);
+    this.output.replaceChildren(renderWord(text));
+    this.refreshCode();
     this.code.classList.add("hidden");
     this.setViewLabel(false);
     this.tools.classList.remove("hidden");
+  }
+
+  private refreshCode(): void {
+    this.code.textContent = exportCode(this.currentWord, this.mode);
+  }
+
+  // Reflect the typed word in the window title so minimized windows differ.
+  private setTitle(word: string): void {
+    this.windowTitle = `user@divtext: ~/${word}`;
+    this.titleEl.textContent = this.windowTitle;
+  }
+
+  private setMode(mode: ExportMode): void {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.highlightMode();
+    if (this.currentWord) this.refreshCode();
+  }
+
+  private highlightMode(): void {
+    for (const button of this.querySelectorAll<HTMLElement>("[data-mode]")) {
+      const active = button.dataset.mode === this.mode;
+      button.classList.toggle("bg-primary", active);
+      button.classList.toggle("text-black", active);
+      button.classList.toggle("text-muted", !active);
+    }
   }
 
   private toggleCode(): void {
@@ -86,11 +119,11 @@ export class TerminalWindow extends HTMLElement {
   }
 
   private setViewLabel(shown: boolean): void {
-    const button = this.querySelector('[data-action="view-html"]');
-    if (button) button.textContent = shown ? "Hide HTML" : "View HTML";
+    const button = this.querySelector('[data-action="view-code"]');
+    if (button) button.textContent = shown ? "Hide code" : "View code";
   }
 
-  private async copyHtml(button: HTMLElement): Promise<void> {
+  private async copyCode(button: HTMLElement): Promise<void> {
     try {
       await navigator.clipboard.writeText(this.code.textContent ?? "");
       const original = button.textContent;
@@ -103,8 +136,18 @@ export class TerminalWindow extends HTMLElement {
     }
   }
 
+  private onMode(mode: ExportMode): void {
+    const el = this.querySelector(`[data-mode="${mode}"]`) as HTMLElement;
+    el.addEventListener("click", () => this.setMode(mode));
+  }
+
   get isMinimized(): boolean {
     return this.state === "minimized";
+  }
+
+  // Short label for the taskbar — the typed word, without the shell prefix.
+  get taskbarTitle(): string {
+    return this.currentWord || "~";
   }
 
   place(left: number, top: number, width: number): void {

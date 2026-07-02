@@ -26,7 +26,7 @@ export function terminalWindowTemplate(): string {
 
     <div class="px-6 pt-[26px] pb-[30px] text-[15px] leading-[1.7]">
       <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --help</p>
-      <p class="whitespace-pre-wrap break-words"><span class="text-primary font-bold">DivText</span> <span class="text-muted">v1.0.1</span></p>
+      <p class="whitespace-pre-wrap break-words"><span class="text-primary font-bold">DivText</span> <span class="text-muted">v${__APP_VERSION__}</span></p>
       <p class="whitespace-pre-wrap break-words">Turn your text into a logo built from <span class="text-primary">&lt;div&gt;</span> elements.</p>
       <p class="whitespace-pre-wrap break-words text-muted">Type a word and watch it draw itself, cell by cell.</p>
       <p class="whitespace-pre-wrap break-words">&nbsp;</p>
@@ -42,14 +42,18 @@ export function terminalWindowTemplate(): string {
       <div data-role="output" class="mt-[18px] min-h-[80px]"></div>
 
       <div data-role="tools" class="mt-4 hidden">
-        <div class="flex items-center gap-2">
-          <button data-action="view-html" type="button"
+        <div class="flex flex-wrap items-center gap-2">
+          <div data-role="mode" class="flex rounded-md overflow-hidden border border-white/10 text-[13px]">
+            <button data-mode="html" type="button" class="px-3 py-1 cursor-pointer">HTML Only</button>
+            <button data-mode="css" type="button" class="px-3 py-1 cursor-pointer border-l border-white/10">HTML + CSS</button>
+          </div>
+          <button data-action="view-code" type="button"
             class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
-            View HTML
+            View code
           </button>
-          <button data-action="copy-html" type="button"
+          <button data-action="copy-code" type="button"
             class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
-            Copy HTML
+            Copy code
           </button>
         </div>
         <pre data-role="code" class="hidden mt-3 p-3 rounded-md bg-black/40 text-muted text-[12px] leading-[1.5] overflow-auto max-h-[220px] whitespace-pre-wrap break-all"></pre>

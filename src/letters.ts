@@ -38,23 +38,82 @@ const FILL = "#10b981"; // primary
 const LETTER_GAP = 10; // px between letters
 const SPACE = 24; // px width of a blank space
 
-// Inline styles (no Tailwind) so exported HTML is self-contained and portable.
-function renderGlyph(rows: string[]): HTMLElement {
-  const letter = document.createElement("div");
-  letter.style.cssText =
-    `display:grid;grid-template-columns:repeat(${COLS},${CELL}px);` +
-    `gap:${GAP}px;flex:0 0 auto`;
+export type ExportMode = "html" | "css";
 
+// BEM block used when exporting with CSS classes.
+const BLOCK = "divtext";
+const CLS = {
+  word: BLOCK,
+  letter: `${BLOCK}__letter`,
+  cell: `${BLOCK}__cell`,
+  cellOn: `${BLOCK}__cell--on`,
+  space: `${BLOCK}__space`,
+};
+
+// Shared stylesheet emitted in CSS mode. Values stay in sync with the
+// constants above so inline and class output can never drift apart.
+const STYLESHEET = [
+  `.${CLS.word} { display: flex; align-items: flex-start; gap: ${LETTER_GAP}px; flex-wrap: wrap; }`,
+  `.${CLS.letter} { display: grid; grid-template-columns: repeat(${COLS}, ${CELL}px); gap: ${GAP}px; flex: 0 0 auto; }`,
+  `.${CLS.cell} { width: ${CELL}px; height: ${CELL}px; }`,
+  `.${CLS.cellOn} { background: ${FILL}; border-radius: 1px; }`,
+  `.${CLS.space} { width: ${SPACE}px; flex: 0 0 auto; }`,
+].join("\n");
+
+function makeCell(on: boolean, mode: ExportMode): HTMLElement {
+  const dot = document.createElement("div");
+  if (mode === "css") {
+    dot.className = on ? `${CLS.cell} ${CLS.cellOn}` : CLS.cell;
+  } else {
+    dot.style.cssText =
+      `width:${CELL}px;height:${CELL}px` +
+      (on ? `;background:${FILL};border-radius:1px` : "");
+  }
+  return dot;
+}
+
+function makeGlyph(rows: string[], mode: ExportMode): HTMLElement {
+  const letter = document.createElement("div");
+  if (mode === "css") {
+    letter.className = CLS.letter;
+  } else {
+    letter.style.cssText =
+      `display:grid;grid-template-columns:repeat(${COLS},${CELL}px);` +
+      `gap:${GAP}px;flex:0 0 auto`;
+  }
   for (const row of rows) {
     for (const cell of row) {
-      const dot = document.createElement("div");
-      dot.style.cssText =
-        `width:${CELL}px;height:${CELL}px` +
-        (cell === "#" ? `;background:${FILL};border-radius:1px` : "");
-      letter.appendChild(dot);
+      letter.appendChild(makeCell(cell === "#", mode));
     }
   }
   return letter;
+}
+
+/**
+ * Turn a word into a row of letter grids. Unknown chars render as a gap.
+ * `mode` picks inline styles ("html", self-contained) or BEM classes ("css").
+ */
+export function renderWord(word: string, mode: ExportMode = "html"): HTMLElement {
+  const line = document.createElement("div");
+  if (mode === "css") {
+    line.className = CLS.word;
+  } else {
+    line.style.cssText =
+      `display:flex;align-items:flex-start;gap:${LETTER_GAP}px;flex-wrap:wrap`;
+  }
+
+  for (const char of word.toUpperCase()) {
+    const glyph = GLYPHS[char];
+    if (glyph) {
+      line.appendChild(makeGlyph(glyph, mode));
+    } else if (char === " ") {
+      const space = document.createElement("div");
+      if (mode === "css") space.className = CLS.space;
+      else space.style.cssText = `width:${SPACE}px;flex:0 0 auto`;
+      line.appendChild(space);
+    }
+  }
+  return line;
 }
 
 /** Serialize an element tree as indented HTML (2-space), Prettier-style. */
@@ -70,21 +129,11 @@ export function formatHtml(el: Element, indent = 0): string {
   return `${pad}<${tag}${attrs}>\n${inner}\n${pad}</${tag}>`;
 }
 
-/** Turn a word into a row of letter grids. Unknown chars render as a gap. */
-export function renderWord(word: string): HTMLElement {
-  const line = document.createElement("div");
-  line.style.cssText =
-    `display:flex;align-items:flex-start;gap:${LETTER_GAP}px;flex-wrap:wrap`;
-
-  for (const char of word.toUpperCase()) {
-    const glyph = GLYPHS[char];
-    if (glyph) {
-      line.appendChild(renderGlyph(glyph));
-    } else if (char === " ") {
-      const space = document.createElement("div");
-      space.style.cssText = `width:${SPACE}px;flex:0 0 auto`;
-      line.appendChild(space);
-    }
+/** Exportable, copy-paste-ready code for a word in the chosen mode. */
+export function exportCode(word: string, mode: ExportMode): string {
+  const markup = formatHtml(renderWord(word, mode));
+  if (mode === "css") {
+    return `<style>\n${STYLESHEET}\n</style>\n${markup}`;
   }
-  return line;
+  return markup;
 }
