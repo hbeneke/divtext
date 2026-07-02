@@ -25,12 +25,14 @@ export function terminalWindowTemplate(): string {
     </div>
 
     <div class="px-6 pt-[26px] pb-[30px] text-[15px] leading-[1.7]">
-      <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --help</p>
-      <p class="whitespace-pre-wrap break-words"><span class="text-primary font-bold">DivText</span> <span class="text-muted">v${__APP_VERSION__}</span></p>
-      <p class="whitespace-pre-wrap break-words">Turn your text into a logo built from <span class="text-primary">&lt;div&gt;</span> elements.</p>
-      <p class="whitespace-pre-wrap break-words text-muted">Type a word and watch it draw itself, cell by cell.</p>
-      <p class="whitespace-pre-wrap break-words">&nbsp;</p>
-      <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --run</p>
+      <div data-role="intro">
+        <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --help</p>
+        <p class="whitespace-pre-wrap break-words"><span class="text-primary font-bold">DivText</span> <span class="text-muted">v${__APP_VERSION__}</span></p>
+        <p class="whitespace-pre-wrap break-words">Turn your text into a logo built from <span class="text-primary">&lt;div&gt;</span> elements.</p>
+        <p class="whitespace-pre-wrap break-words text-muted">Type a word and watch it draw itself, cell by cell.</p>
+        <p class="whitespace-pre-wrap break-words">&nbsp;</p>
+        <p class="whitespace-pre-wrap break-words"><span class="text-secondary select-none">$</span> divtext --run</p>
+      </div>
 
       <label class="flex items-center gap-2 mt-2 cursor-text whitespace-pre-wrap break-words">
         <span class="select-none shrink-0"><span class="text-primary font-bold">user@divtext</span><span class="text-fg">:</span><span class="text-secondary">~</span><span class="text-fg">$</span></span>
@@ -51,12 +53,15 @@ export function terminalWindowTemplate(): string {
             class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
             View code
           </button>
-          <button data-action="copy-code" type="button"
-            class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
-            Copy code
-          </button>
         </div>
-        <pre data-role="code" class="hidden mt-3 p-3 rounded-md bg-black/40 text-muted text-[12px] leading-[1.5] overflow-auto max-h-[220px] whitespace-pre-wrap break-all"></pre>
+        <div data-role="code-box" class="hidden relative mt-3">
+          <button data-action="copy-code" type="button"
+            class="absolute top-2 right-2 z-10 px-2.5 py-1 rounded-md text-[12px] bg-bar/90 text-fg border border-white/10 hover:border-white/25 backdrop-blur cursor-pointer">
+            Copy
+          </button>
+          <div data-role="code-slot"
+            class="rounded-md border border-white/10 overflow-auto max-h-[220px] font-mono text-[12px] leading-[1.5] [&_pre]:m-0 [&_pre]:p-3"></div>
+        </div>
       </div>
     </div>
   `;

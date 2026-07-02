@@ -21,7 +21,9 @@ export class TerminalWindow extends HTMLElement {
   private input!: HTMLInputElement;
   private output!: HTMLElement;
   private tools!: HTMLElement;
-  private code!: HTMLElement;
+  private codeSlot!: HTMLElement;
+  private codeBox!: HTMLElement;
+  private codeText = "";
   private titleEl!: HTMLElement;
   private mode: ExportMode = "html";
   private currentWord = "";
@@ -40,7 +42,8 @@ export class TerminalWindow extends HTMLElement {
     this.input = this.querySelector('[data-role="input"]') as HTMLInputElement;
     this.output = this.querySelector('[data-role="output"]') as HTMLElement;
     this.tools = this.querySelector('[data-role="tools"]') as HTMLElement;
-    this.code = this.querySelector('[data-role="code"]') as HTMLElement;
+    this.codeSlot = this.querySelector('[data-role="code-slot"]') as HTMLElement;
+    this.codeBox = this.querySelector('[data-role="code-box"]') as HTMLElement;
 
     this.titleEl.textContent = this.windowTitle;
 
@@ -80,15 +83,48 @@ export class TerminalWindow extends HTMLElement {
   private render(text: string): void {
     this.currentWord = text;
     this.setTitle(text);
+    this.collapseIntro();
     this.output.replaceChildren(renderWord(text));
+    this.animateCells();
     this.refreshCode();
-    this.code.classList.add("hidden");
+    this.codeBox.classList.add("hidden");
     this.setViewLabel(false);
     this.tools.classList.remove("hidden");
   }
 
-  private refreshCode(): void {
-    this.code.textContent = exportCode(this.currentWord, this.mode);
+  // Stagger a "draw" animation across every cell so the word builds up.
+  private animateCells(): void {
+    let i = 0;
+    for (const cell of this.output.querySelectorAll<HTMLElement>("div div")) {
+      if (cell.childElementCount > 0) continue; // only leaf cells
+      cell.style.animationDelay = `${i++ * 6}ms`;
+      cell.classList.add("divtext-draw");
+    }
+  }
+
+  // Smoothly collapse the intro block the first time a word is rendered.
+  private collapseIntro(): void {
+    const intro = this.querySelector<HTMLElement>('[data-role="intro"]');
+    if (!intro || intro.classList.contains("hidden")) return;
+    intro.style.overflow = "hidden";
+    intro.style.maxHeight = `${intro.scrollHeight}px`;
+    requestAnimationFrame(() => {
+      intro.style.transition = "max-height 300ms ease, opacity 300ms ease, margin 300ms ease";
+      intro.style.maxHeight = "0";
+      intro.style.opacity = "0";
+      intro.style.marginBottom = "0";
+    });
+    intro.addEventListener("transitionend", () => intro.classList.add("hidden"), {
+      once: true,
+    });
+  }
+
+  private async refreshCode(): Promise<void> {
+    this.codeText = exportCode(this.currentWord, this.mode);
+    const text = this.codeText;
+    const { highlightHtml } = await import("@/highlight");
+    const html = await highlightHtml(text);
+    if (this.codeText === text) this.codeSlot.innerHTML = html; // ignore stale
   }
 
   // Reflect the typed word in the window title so minimized windows differ.
@@ -114,7 +150,7 @@ export class TerminalWindow extends HTMLElement {
   }
 
   private toggleCode(): void {
-    const shown = this.code.classList.toggle("hidden");
+    const shown = this.codeBox.classList.toggle("hidden");
     this.setViewLabel(!shown);
   }
 
@@ -125,13 +161,13 @@ export class TerminalWindow extends HTMLElement {
 
   private async copyCode(button: HTMLElement): Promise<void> {
     try {
-      await navigator.clipboard.writeText(this.code.textContent ?? "");
+      await navigator.clipboard.writeText(this.codeText);
       const original = button.textContent;
       button.textContent = "Copied!";
       setTimeout(() => (button.textContent = original), 1200);
     } catch {
       // Clipboard blocked (e.g. insecure context) — reveal the code to copy manually.
-      this.code.classList.remove("hidden");
+      this.codeBox.classList.remove("hidden");
       this.setViewLabel(true);
     }
   }
