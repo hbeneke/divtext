@@ -20,7 +20,9 @@ export class WindowDesktop extends HTMLElement {
       on(this, "wm:minimize", () => this.notifyChanged()),
       on(this, "wm:close", (e) => this.close(e.target as BaseWindow)),
       on(document, "wm:spawn", () => this.spawn()),
-      on(document, "wm:code", (e) => this.spawnCode(e.detail.word, e.detail.fontId)),
+      on(document, "wm:code", (e) =>
+        this.spawnCode(e.detail.word, e.detail.fontId, e.detail.color),
+      ),
       on(document, "wm:restore", (e) => this.restore(e.detail.id)),
     );
     this.spawn();
@@ -50,11 +52,12 @@ export class WindowDesktop extends HTMLElement {
     win.focusPrompt();
   }
 
-  private spawnCode(word: string, fontId: string): void {
+  private spawnCode(word: string, fontId: string, color: string): void {
     const win = document.createElement("code-window") as CodeWindow;
     win.windowId = ++this.idSeq;
     win.word = word;
     win.fontId = fontId;
+    win.color = color;
 
     const width = Math.min(CODE_WIDTH, this.clientWidth - 32);
     const baseLeft = Math.max(20, (this.clientWidth - width) / 2);

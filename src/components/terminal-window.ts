@@ -1,4 +1,4 @@
-import { DEFAULT_FONT, FONTS, renderWord, type Font } from "@/fonts";
+import { DEFAULT_COLOR, DEFAULT_FONT, FONTS, renderWord, type Font } from "@/fonts";
 import { emit } from "@/events";
 import { BaseWindow } from "@/components/base-window";
 import { terminalBodyTemplate } from "@/components/terminal-window.template";
@@ -11,6 +11,7 @@ export class TerminalWindow extends BaseWindow {
   private tools!: HTMLElement;
   private currentWord = "";
   private font: Font = DEFAULT_FONT;
+  private color = DEFAULT_COLOR;
 
   protected renderBody(host: HTMLElement): void {
     host.innerHTML = terminalBodyTemplate();
@@ -37,11 +38,25 @@ export class TerminalWindow extends BaseWindow {
 
     this.onAction("view-code", () => {
       if (this.currentWord) {
-        emit(document, "wm:code", { word: this.currentWord, fontId: this.font.id });
+        emit(document, "wm:code", {
+          word: this.currentWord,
+          fontId: this.font.id,
+          color: this.color,
+        });
       }
     });
 
+    const colorInput = host.querySelector('[data-role="color"]') as HTMLInputElement;
+    colorInput.addEventListener("input", () => this.setColor(colorInput.value));
+
     this.buildFontPicker(host.querySelector('[data-role="fonts"]') as HTMLElement);
+  }
+
+  private setColor(color: string): void {
+    this.color = color;
+    if (this.currentWord) {
+      this.output.replaceChildren(renderWord(this.currentWord, this.font, this.color));
+    }
   }
 
   private buildFontPicker(host: HTMLElement): void {
@@ -67,7 +82,7 @@ export class TerminalWindow extends BaseWindow {
     this.font = font;
     this.highlightFont();
     if (this.currentWord) {
-      this.output.replaceChildren(renderWord(this.currentWord, this.font));
+      this.output.replaceChildren(renderWord(this.currentWord, this.font, this.color));
       this.animateCells();
     }
   }
@@ -94,7 +109,7 @@ export class TerminalWindow extends BaseWindow {
     this.currentWord = text;
     this.setTitle(`user@divtext: ~/${text}`);
     this.collapseIntro();
-    this.output.replaceChildren(renderWord(text, this.font));
+    this.output.replaceChildren(renderWord(text, this.font, this.color));
     this.animateCells();
     this.tools.classList.remove("hidden");
   }

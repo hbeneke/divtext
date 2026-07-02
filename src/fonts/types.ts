@@ -5,6 +5,16 @@ export type CssStyle = "bem" | "minimal";
 
 export type CodeLang = "html" | "css";
 
+export const DEFAULT_COLOR = "#10b981";
+
+export interface RenderOptions {
+  mode: ExportMode;
+  /** CSS class convention (css mode only). */
+  style: CssStyle;
+  /** Fill color for the letters. */
+  color: string;
+}
+
 export interface CodePart {
   title: string;
   lang: CodeLang;
@@ -20,15 +30,11 @@ export interface Font {
   id: string;
   /** Human-readable name for pickers. */
   label: string;
+  /** Build the DOM for a word with the given render options. */
+  render(word: string, opts: RenderOptions): HTMLElement;
   /**
-   * Build the DOM for a word. `mode` picks inline styles ("html",
-   * self-contained) or shared CSS classes ("css"). In "css" mode `style`
-   * selects the class convention.
+   * Stylesheet emitted alongside the markup in "css" mode. Omit for fonts
+   * that are inline-only (no shared classes).
    */
-  render(word: string, mode: ExportMode, style?: CssStyle): HTMLElement;
-  /**
-   * Stylesheet emitted alongside the markup in "css" mode, for the given
-   * convention. Omit for fonts that are inline-only (no shared classes).
-   */
-  stylesheet?(style: CssStyle): string;
+  stylesheet?(opts: RenderOptions): string;
 }

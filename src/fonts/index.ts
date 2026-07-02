@@ -1,8 +1,17 @@
 import { formatHtml } from "@/fonts/format";
 import { pixelFont } from "@/fonts/pixel";
+import { DEFAULT_COLOR } from "@/fonts/types";
 import type { CodePart, CssStyle, ExportMode, Font } from "@/fonts/types";
 
-export type { CodePart, CodeLang, CssStyle, ExportMode, Font } from "@/fonts/types";
+export { DEFAULT_COLOR } from "@/fonts/types";
+export type {
+  CodePart,
+  CodeLang,
+  CssStyle,
+  ExportMode,
+  Font,
+  RenderOptions,
+} from "@/fonts/types";
 
 // Registry of available letter styles. Add new fonts here.
 export const FONTS: Font[] = [pixelFont];
@@ -14,8 +23,12 @@ export function getFont(id: string): Font {
 }
 
 /** Build the display DOM for a word (self-contained inline styles). */
-export function renderWord(word: string, font: Font = DEFAULT_FONT): HTMLElement {
-  return font.render(word, "html");
+export function renderWord(
+  word: string,
+  font: Font = DEFAULT_FONT,
+  color: string = DEFAULT_COLOR,
+): HTMLElement {
+  return font.render(word, { mode: "html", style: "bem", color });
 }
 
 /** Copy-paste-ready code for a word, split into blocks per the chosen mode. */
@@ -24,12 +37,14 @@ export function exportParts(
   mode: ExportMode,
   font: Font = DEFAULT_FONT,
   style: CssStyle = "bem",
+  color: string = DEFAULT_COLOR,
 ): CodePart[] {
-  const markup = formatHtml(font.render(word, mode, style));
+  const opts = { mode, style, color };
+  const markup = formatHtml(font.render(word, opts));
   if (mode === "css" && font.stylesheet) {
     // CSS and HTML kept as separate blocks.
     return [
-      { title: "styles.css", lang: "css", code: font.stylesheet(style) },
+      { title: "styles.css", lang: "css", code: font.stylesheet(opts) },
       { title: "index.html", lang: "html", code: markup },
     ];
   }

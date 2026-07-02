@@ -1,4 +1,5 @@
 import {
+  DEFAULT_COLOR,
   exportParts,
   getFont,
   type CodePart,
@@ -11,6 +12,7 @@ import { BaseWindow } from "@/components/base-window";
 export class CodeWindow extends BaseWindow {
   word = "";
   fontId = "";
+  color = DEFAULT_COLOR;
 
   private mode: ExportMode = "html";
   private cssStyle: CssStyle = "bem";
@@ -52,7 +54,13 @@ export class CodeWindow extends BaseWindow {
   private async refreshCode(): Promise<void> {
     const seq = ++this.codeSeq;
     this.styleRow.classList.toggle("hidden", this.mode !== "css");
-    const parts = exportParts(this.word, this.mode, getFont(this.fontId), this.cssStyle);
+    const parts = exportParts(
+      this.word,
+      this.mode,
+      getFont(this.fontId),
+      this.cssStyle,
+      this.color,
+    );
     const slots = parts.map((part) => this.buildCodeBlock(part));
     this.codeBox.replaceChildren(...slots.map((s) => s.block));
 

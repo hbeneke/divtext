@@ -21,6 +21,11 @@ export function terminalBodyTemplate(): string {
 
       <div data-role="tools" class="mt-4 hidden flex flex-wrap items-center gap-2">
         <div data-role="fonts" class="flex rounded-md overflow-hidden border border-white/10 text-[13px]"></div>
+        <label class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[13px] text-muted border border-white/10 cursor-pointer">
+          Color
+          <input data-role="color" type="color" value="#10b981"
+            class="w-5 h-5 p-0 bg-transparent border-none cursor-pointer">
+        </label>
         <button data-action="view-code" type="button"
           class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
           View code
