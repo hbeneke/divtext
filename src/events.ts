@@ -8,6 +8,7 @@ export interface WindowEventMap {
   "wm:minimize": undefined;
   "wm:close": undefined;
   "wm:spawn": undefined;
+  "wm:code": { word: string };
   "wm:restore": { id: number };
   "wm:changed": MinimizedWindow[];
 }

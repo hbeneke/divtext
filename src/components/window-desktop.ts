@@ -1,8 +1,11 @@
 import { clamp } from "@/clamp";
 import { emit, on } from "@/events";
+import type { BaseWindow } from "@/components/base-window";
 import type { TerminalWindow } from "@/components/terminal-window";
+import type { CodeWindow } from "@/components/code-window";
 
 const WINDOW_WIDTH = 720;
+const CODE_WIDTH = 560;
 const CASCADE = 28;
 
 export class WindowDesktop extends HTMLElement {
@@ -13,10 +16,11 @@ export class WindowDesktop extends HTMLElement {
 
   connectedCallback(): void {
     this.cleanups.push(
-      on(this, "wm:focus", (e) => this.raise(e.target as TerminalWindow)),
+      on(this, "wm:focus", (e) => this.raise(e.target as BaseWindow)),
       on(this, "wm:minimize", () => this.notifyChanged()),
-      on(this, "wm:close", (e) => this.close(e.target as TerminalWindow)),
+      on(this, "wm:close", (e) => this.close(e.target as BaseWindow)),
       on(document, "wm:spawn", () => this.spawn()),
+      on(document, "wm:code", (e) => this.spawnCode(e.detail.word)),
       on(document, "wm:restore", (e) => this.restore(e.detail.id)),
     );
     this.spawn();
@@ -46,11 +50,30 @@ export class WindowDesktop extends HTMLElement {
     win.focusPrompt();
   }
 
-  private raise(win: TerminalWindow): void {
+  private spawnCode(word: string): void {
+    const win = document.createElement("code-window") as CodeWindow;
+    win.windowId = ++this.idSeq;
+    win.word = word;
+
+    const width = Math.min(CODE_WIDTH, this.clientWidth - 32);
+    const baseLeft = Math.max(20, (this.clientWidth - width) / 2);
+    const offset = (this.spawnCount % 8) * CASCADE;
+    this.spawnCount++;
+
+    this.appendChild(win);
+    win.place(
+      clamp(baseLeft + offset, 8, Math.max(8, this.clientWidth - width - 8)),
+      clamp(56 + offset, 8, Math.max(8, this.clientHeight - 120)),
+      width,
+    );
+    this.raise(win);
+  }
+
+  private raise(win: BaseWindow): void {
     win.raise(++this.zSeq);
   }
 
-  private close(win: TerminalWindow): void {
+  private close(win: BaseWindow): void {
     win.remove();
     this.notifyChanged();
   }
@@ -63,8 +86,8 @@ export class WindowDesktop extends HTMLElement {
     this.notifyChanged();
   }
 
-  private windows(): TerminalWindow[] {
-    return [...this.querySelectorAll<TerminalWindow>("terminal-window")];
+  private windows(): BaseWindow[] {
+    return [...this.querySelectorAll<BaseWindow>("terminal-window, code-window")];
   }
 
   private notifyChanged(): void {

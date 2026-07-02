@@ -1,0 +1,108 @@
+import { exportParts, type CodePart, type ExportMode } from "@/letters";
+import { BaseWindow } from "@/components/base-window";
+
+// Separate window that shows the exported code for a snapshot of a word.
+export class CodeWindow extends BaseWindow {
+  word = "";
+
+  private mode: ExportMode = "html";
+  private codeBox!: HTMLElement;
+  private codeSeq = 0;
+
+  protected renderBody(host: HTMLElement): void {
+    this.setTitle(`code — ${this.word}`);
+    host.innerHTML = `
+      <div class="px-5 py-4 flex flex-col gap-3">
+        <div data-role="mode" class="flex w-max rounded-md overflow-hidden border border-white/10 text-[13px]">
+          <button data-mode="html" type="button" class="px-3 py-1 cursor-pointer">HTML Only</button>
+          <button data-mode="css" type="button" class="px-3 py-1 cursor-pointer border-l border-white/10">HTML + CSS</button>
+        </div>
+        <div data-role="code-box" class="flex flex-col gap-3"></div>
+      </div>
+    `;
+
+    this.codeBox = host.querySelector('[data-role="code-box"]') as HTMLElement;
+    this.onMode("html");
+    this.onMode("css");
+    this.highlightMode();
+    this.refreshCode();
+  }
+
+  override get taskbarTitle(): string {
+    return `${this.word} · code`;
+  }
+
+  private async refreshCode(): Promise<void> {
+    const seq = ++this.codeSeq;
+    const parts = exportParts(this.word, this.mode);
+    const slots = parts.map((part) => this.buildCodeBlock(part));
+    this.codeBox.replaceChildren(...slots.map((s) => s.block));
+
+    const { highlight } = await import("@/highlight");
+    for (let i = 0; i < parts.length; i++) {
+      const html = await highlight(parts[i].code, parts[i].lang);
+      if (seq !== this.codeSeq) return; // a newer render superseded this one
+      slots[i].slot.innerHTML = html;
+    }
+  }
+
+  // Build one titled code block (label + copy button + highlight slot).
+  private buildCodeBlock(part: CodePart): { block: HTMLElement; slot: HTMLElement } {
+    const block = document.createElement("div");
+
+    const header = document.createElement("div");
+    header.className = "flex items-center justify-between px-1 pb-1 text-[11px] text-muted";
+    const label = document.createElement("span");
+    label.textContent = part.title;
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.textContent = "Copy";
+    copy.className =
+      "px-2 py-0.5 rounded text-[11px] text-fg border border-white/10 hover:border-white/25 cursor-pointer";
+    copy.addEventListener("click", () => this.copyCode(copy, part.code));
+    header.append(label, copy);
+
+    const slot = document.createElement("div");
+    slot.className =
+      "rounded-md border border-white/10 overflow-auto scroll-slim max-h-[240px] font-mono text-[12px] leading-[1.5] [&_pre]:m-0 [&_pre]:p-3";
+
+    block.append(header, slot);
+    return { block, slot };
+  }
+
+  private async copyCode(button: HTMLElement, code: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(code);
+      const original = button.textContent;
+      button.textContent = "Copied!";
+      setTimeout(() => (button.textContent = original), 1200);
+    } catch {
+      // Clipboard blocked (e.g. insecure context) — nothing else to do.
+    }
+  }
+
+  private setMode(mode: ExportMode): void {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.highlightMode();
+    this.refreshCode();
+  }
+
+  private highlightMode(): void {
+    for (const button of this.querySelectorAll<HTMLElement>("[data-mode]")) {
+      const active = button.dataset.mode === this.mode;
+      button.classList.toggle("bg-primary", active);
+      button.classList.toggle("text-black", active);
+      button.classList.toggle("text-muted", !active);
+    }
+  }
+
+  private onMode(mode: ExportMode): void {
+    const el = this.querySelector(`[data-mode="${mode}"]`) as HTMLElement;
+    el.addEventListener("click", () => this.setMode(mode));
+  }
+}
+
+if (!customElements.get("code-window")) {
+  customElements.define("code-window", CodeWindow);
+}

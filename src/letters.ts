@@ -51,14 +51,41 @@ const CLS = {
 };
 
 // Shared stylesheet emitted in CSS mode. Values stay in sync with the
-// constants above so inline and class output can never drift apart.
+// constants above so inline and class output can never drift apart. Rules are
+// formatted one declaration per line so no line exceeds ~80 columns.
+function rule(selector: string, decls: Record<string, string>): string {
+  const body = Object.entries(decls)
+    .map(([prop, value]) => `  ${prop}: ${value};`)
+    .join("\n");
+  return `.${selector} {\n${body}\n}`;
+}
+
 const STYLESHEET = [
-  `.${CLS.word} { display: flex; align-items: flex-start; gap: ${LETTER_GAP}px; flex-wrap: wrap; }`,
-  `.${CLS.letter} { display: grid; grid-template-columns: repeat(${COLS}, ${CELL}px); gap: ${GAP}px; flex: 0 0 auto; }`,
-  `.${CLS.cell} { width: ${CELL}px; height: ${CELL}px; }`,
-  `.${CLS.cellOn} { background: ${FILL}; border-radius: 1px; }`,
-  `.${CLS.space} { width: ${SPACE}px; flex: 0 0 auto; }`,
-].join("\n");
+  rule(CLS.word, {
+    display: "flex",
+    "align-items": "flex-start",
+    gap: `${LETTER_GAP}px`,
+    "flex-wrap": "wrap",
+  }),
+  rule(CLS.letter, {
+    display: "grid",
+    "grid-template-columns": `repeat(${COLS}, ${CELL}px)`,
+    gap: `${GAP}px`,
+    flex: "0 0 auto",
+  }),
+  rule(CLS.cell, {
+    width: `${CELL}px`,
+    height: `${CELL}px`,
+  }),
+  rule(CLS.cellOn, {
+    background: FILL,
+    "border-radius": "1px",
+  }),
+  rule(CLS.space, {
+    width: `${SPACE}px`,
+    flex: "0 0 auto",
+  }),
+].join("\n\n");
 
 function makeCell(on: boolean, mode: ExportMode): HTMLElement {
   const dot = document.createElement("div");
@@ -129,11 +156,23 @@ export function formatHtml(el: Element, indent = 0): string {
   return `${pad}<${tag}${attrs}>\n${inner}\n${pad}</${tag}>`;
 }
 
-/** Exportable, copy-paste-ready code for a word in the chosen mode. */
-export function exportCode(word: string, mode: ExportMode): string {
+export type CodeLang = "html" | "css";
+
+export interface CodePart {
+  title: string;
+  lang: CodeLang;
+  code: string;
+}
+
+/** Copy-paste-ready code for a word, split into blocks per the chosen mode. */
+export function exportParts(word: string, mode: ExportMode): CodePart[] {
   const markup = formatHtml(renderWord(word, mode));
   if (mode === "css") {
-    return `<style>\n${STYLESHEET}\n</style>\n${markup}`;
+    // CSS and HTML kept as separate blocks.
+    return [
+      { title: "styles.css", lang: "css", code: STYLESHEET },
+      { title: "index.html", lang: "html", code: markup },
+    ];
   }
-  return markup;
+  return [{ title: "index.html", lang: "html", code: markup }];
 }
