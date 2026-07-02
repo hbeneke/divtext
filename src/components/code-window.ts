@@ -1,11 +1,20 @@
-import { exportParts, type CodePart, type ExportMode } from "@/letters";
+import {
+  exportParts,
+  getFont,
+  type CodePart,
+  type CssStyle,
+  type ExportMode,
+} from "@/fonts";
 import { BaseWindow } from "@/components/base-window";
 
 // Separate window that shows the exported code for a snapshot of a word.
 export class CodeWindow extends BaseWindow {
   word = "";
+  fontId = "";
 
   private mode: ExportMode = "html";
+  private cssStyle: CssStyle = "bem";
+  private styleRow!: HTMLElement;
   private codeBox!: HTMLElement;
   private codeSeq = 0;
 
@@ -17,14 +26,22 @@ export class CodeWindow extends BaseWindow {
           <button data-mode="html" type="button" class="px-3 py-1 cursor-pointer">HTML Only</button>
           <button data-mode="css" type="button" class="px-3 py-1 cursor-pointer border-l border-white/10">HTML + CSS</button>
         </div>
+        <div data-role="style" class="hidden w-max rounded-md overflow-hidden border border-white/10 text-[13px]">
+          <button data-style="bem" type="button" class="px-3 py-1 cursor-pointer">BEM</button>
+          <button data-style="minimal" type="button" class="px-3 py-1 cursor-pointer border-l border-white/10">Minimal</button>
+        </div>
         <div data-role="code-box" class="flex flex-col gap-3"></div>
       </div>
     `;
 
+    this.styleRow = host.querySelector('[data-role="style"]') as HTMLElement;
     this.codeBox = host.querySelector('[data-role="code-box"]') as HTMLElement;
     this.onMode("html");
     this.onMode("css");
+    this.onStyle("bem");
+    this.onStyle("minimal");
     this.highlightMode();
+    this.highlightStyle();
     this.refreshCode();
   }
 
@@ -34,7 +51,8 @@ export class CodeWindow extends BaseWindow {
 
   private async refreshCode(): Promise<void> {
     const seq = ++this.codeSeq;
-    const parts = exportParts(this.word, this.mode);
+    this.styleRow.classList.toggle("hidden", this.mode !== "css");
+    const parts = exportParts(this.word, this.mode, getFont(this.fontId), this.cssStyle);
     const slots = parts.map((part) => this.buildCodeBlock(part));
     this.codeBox.replaceChildren(...slots.map((s) => s.block));
 
@@ -100,6 +118,27 @@ export class CodeWindow extends BaseWindow {
   private onMode(mode: ExportMode): void {
     const el = this.querySelector(`[data-mode="${mode}"]`) as HTMLElement;
     el.addEventListener("click", () => this.setMode(mode));
+  }
+
+  private setStyle(style: CssStyle): void {
+    if (this.cssStyle === style) return;
+    this.cssStyle = style;
+    this.highlightStyle();
+    this.refreshCode();
+  }
+
+  private highlightStyle(): void {
+    for (const button of this.querySelectorAll<HTMLElement>("[data-style]")) {
+      const active = button.dataset.style === this.cssStyle;
+      button.classList.toggle("bg-primary", active);
+      button.classList.toggle("text-black", active);
+      button.classList.toggle("text-muted", !active);
+    }
+  }
+
+  private onStyle(style: CssStyle): void {
+    const el = this.querySelector(`[data-style="${style}"]`) as HTMLElement;
+    el.addEventListener("click", () => this.setStyle(style));
   }
 }
 

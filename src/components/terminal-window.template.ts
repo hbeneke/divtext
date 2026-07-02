@@ -19,7 +19,8 @@ export function terminalBodyTemplate(): string {
 
       <div data-role="output" class="mt-[18px] min-h-[80px]"></div>
 
-      <div data-role="tools" class="mt-4 hidden">
+      <div data-role="tools" class="mt-4 hidden flex flex-wrap items-center gap-2">
+        <div data-role="fonts" class="flex rounded-md overflow-hidden border border-white/10 text-[13px]"></div>
         <button data-action="view-code" type="button"
           class="px-3 py-1 rounded-md text-[13px] bg-bar text-fg border border-white/10 hover:border-white/25 cursor-pointer">
           View code

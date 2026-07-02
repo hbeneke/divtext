@@ -1,4 +1,4 @@
-import { renderWord } from "@/letters";
+import { DEFAULT_FONT, FONTS, renderWord, type Font } from "@/fonts";
 import { emit } from "@/events";
 import { BaseWindow } from "@/components/base-window";
 import { terminalBodyTemplate } from "@/components/terminal-window.template";
@@ -10,6 +10,7 @@ export class TerminalWindow extends BaseWindow {
   private output!: HTMLElement;
   private tools!: HTMLElement;
   private currentWord = "";
+  private font: Font = DEFAULT_FONT;
 
   protected renderBody(host: HTMLElement): void {
     host.innerHTML = terminalBodyTemplate();
@@ -35,8 +36,49 @@ export class TerminalWindow extends BaseWindow {
     });
 
     this.onAction("view-code", () => {
-      if (this.currentWord) emit(document, "wm:code", { word: this.currentWord });
+      if (this.currentWord) {
+        emit(document, "wm:code", { word: this.currentWord, fontId: this.font.id });
+      }
     });
+
+    this.buildFontPicker(host.querySelector('[data-role="fonts"]') as HTMLElement);
+  }
+
+  private buildFontPicker(host: HTMLElement): void {
+    if (FONTS.length < 2) {
+      host.classList.add("hidden"); // no point showing a one-option picker
+      return;
+    }
+    for (const font of FONTS) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.font = font.id;
+      button.textContent = font.label;
+      button.className =
+        "px-3 py-1 cursor-pointer border-white/10 [&:not(:first-child)]:border-l";
+      button.addEventListener("click", () => this.setFont(font));
+      host.appendChild(button);
+    }
+    this.highlightFont();
+  }
+
+  private setFont(font: Font): void {
+    if (this.font === font) return;
+    this.font = font;
+    this.highlightFont();
+    if (this.currentWord) {
+      this.output.replaceChildren(renderWord(this.currentWord, this.font));
+      this.animateCells();
+    }
+  }
+
+  private highlightFont(): void {
+    for (const button of this.querySelectorAll<HTMLElement>("[data-font]")) {
+      const active = button.dataset.font === this.font.id;
+      button.classList.toggle("bg-primary", active);
+      button.classList.toggle("text-black", active);
+      button.classList.toggle("text-muted", !active);
+    }
   }
 
   override focusPrompt(): void {
@@ -52,7 +94,7 @@ export class TerminalWindow extends BaseWindow {
     this.currentWord = text;
     this.setTitle(`user@divtext: ~/${text}`);
     this.collapseIntro();
-    this.output.replaceChildren(renderWord(text));
+    this.output.replaceChildren(renderWord(text, this.font));
     this.animateCells();
     this.tools.classList.remove("hidden");
   }
